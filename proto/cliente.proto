@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package emergencia;
+
+option go_package = "SD-Tarea2/vm1/emergencia;emergencia";
+
+message Emergencia {
+  string name = 1;
+  int32 latitude = 2;
+  int32 longitude = 3;
+  int32 magnitude = 4;
+}
+
+message EmergenciaList {
+  repeated Emergencia emergencias = 1;
+}
+
+message Respuesta {
+  string mensaje = 1;
+}
+
+service Asignacion {
+  rpc EnviarEmergencias (EmergenciaList) returns (Respuesta);
+}
