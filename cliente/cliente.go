@@ -9,8 +9,10 @@ import (
 	"time"
 
 	pb "tarea2d/proto/emergencia"
+	mon "tarea2d/proto/monitoreo"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type EmergenciaArchivo struct {
@@ -37,10 +39,10 @@ func main() {
 		log.Fatalf("Error al parsear JSON: %v", err)
 	}
 
-	// Conexión gRPC
-	conn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+	// Conexión gRPC a asignación
+	conn, err := grpc.Dial("localhost:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("No se pudo conectar: %v", err)
+		log.Fatalf("No se pudo conectar al servicio de asignación: %v", err)
 	}
 	defer conn.Close()
 
@@ -57,7 +59,7 @@ func main() {
 		})
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := client.EnviarEmergencias(ctx, &pb.Emergencias{Lista: lista})
@@ -65,5 +67,35 @@ func main() {
 		log.Fatalf("Error al enviar emergencias: %v", err)
 	}
 
-	fmt.Println("Respuesta del servidor:", resp.Mensaje)
+	fmt.Println("📨 Respuesta del servidor de asignación:", resp.Mensaje)
+
+	// ----------------------------
+	// Conexión al servicio de monitoreo
+	// ----------------------------
+
+	monConn, err := grpc.Dial("localhost:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("No se pudo conectar al servicio de monitoreo: %v", err)
+	}
+	defer monConn.Close()
+
+	monClient := mon.NewServicioMonitoreoClient(monConn)
+
+	// Enviar solicitud de actualizaciones
+	stream, err := monClient.RecibirActualizaciones(context.Background(), &mon.Actualizacion{
+		Nombre: "Emergencia Cliente",
+	})
+	if err != nil {
+		log.Fatalf("Error al recibir actualizaciones: %v", err)
+	}
+
+	fmt.Println("🛰️ Escuchando actualizaciones en tiempo real:")
+	for {
+		update, err := stream.Recv()
+		if err != nil {
+			fmt.Println("🚫 Fin del stream o error:", err)
+			break
+		}
+		fmt.Printf("📡 [%s] %s\n", update.Nombre, update.Estado)
+	}
 }
