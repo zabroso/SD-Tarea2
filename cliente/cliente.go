@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	pb "tarea2d/proto"
+	pb "tarea2d/proto/emergencia"
 
 	"google.golang.org/grpc"
 )

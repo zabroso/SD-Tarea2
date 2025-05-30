@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	pb "tarea2d/proto"
+	pb "tarea2d/proto/monitoreo" // Importa el paquete generado por el .proto
 
 	"github.com/streadway/amqp"
 	"google.golang.org/grpc"

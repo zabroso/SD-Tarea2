@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package dronesasignacion;
+option go_package = "SD-Tarea2/proto;dronesasignacion";
+
+message AsignacionEmergencia {
+  string drone_id = 1;
+  string nombre = 2;
+  int32 latitude = 3;
+  int32 longitude = 4;
+  int32 magnitud = 5;
+}
+
+message ResultadoEmergencia {
+  string drone_id = 1;
+  string nombre = 2;
+  string resultado = 3;
+}
+
+message Respuesta {
+  string mensaje = 1;
+}
+
+// Servicio que implementa Drones (servidor)
+service DronService {
+  rpc RecibirAsignacion(AsignacionEmergencia) returns (Respuesta);
+}
+
+// Servicio que implementa Asignacion (servidor)
+service AsignacionService {
+  rpc NotificarResultado(ResultadoEmergencia) returns (Respuesta);
+}

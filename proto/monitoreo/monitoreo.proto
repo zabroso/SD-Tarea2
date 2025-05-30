@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package monitoreo;
+option go_package = "SD-Tarea2/proto/monitoreo;monitoreo";
+
+message Actualizacion {
+  string nombre = 1;
+  string estado = 2;
+}
+
+service ServicioMonitoreo {
+  rpc RecibirActualizaciones(Actualizacion) returns (stream Actualizacion);
+}
